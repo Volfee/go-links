@@ -12,6 +12,7 @@ import (
 func Run(port int) {
 
 	http.HandleFunc("/", requestHandler)
+	http.HandleFunc("/create/", registerNewView)
 	http.HandleFunc("/favicon.ico", http.NotFound)
 
 	log.Printf("Server running on port :%d", port)
@@ -24,12 +25,41 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Redirecting to %s", url)
 		http.Redirect(w, r, url, http.StatusFound)
 	} else {
-		log.Printf("Registring path %s", path)
-		registerNewView(w, r, path)
+		log.Printf("Path %s not found; Asking to register.", path)
+		registerLinkTemplate := template.Must(template.ParseFiles("views/not_found.html"))
+		if err := registerLinkTemplate.Execute(w, path); err != nil {
+			log.Print(err)
+		}
 	}
 }
 
-func registerNewView(w http.ResponseWriter, r *http.Request, path string) {
+type context struct {
+	Path      string
+	Url       string
+	Submitted bool
+}
+
+func registerNewView(w http.ResponseWriter, r *http.Request) {
 	registerLinkTemplate := template.Must(template.ParseFiles("views/register_link.html"))
-	registerLinkTemplate.Execute(w, path)
+	if r.Method == http.MethodPost {
+		if err := r.ParseForm(); err != nil {
+			log.Fatal(err)
+		}
+		path := r.Form.Get("path")
+		url := r.Form.Get("url")
+		if err := database.RegisterUrl(path, url); err != nil {
+			log.Fatal(err)
+		}
+		cont := context{Path: path, Url: url, Submitted: true}
+		if err := registerLinkTemplate.Execute(w, cont); err != nil {
+			log.Print(err)
+		}
+
+	} else {
+		path := strings.TrimLeft(r.URL.RawQuery, "path=")
+		cont := context{Path: path, Url: "", Submitted: false}
+		if err := registerLinkTemplate.Execute(w, cont); err != nil {
+			log.Print(err)
+		}
+	}
 }
