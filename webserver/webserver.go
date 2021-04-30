@@ -36,15 +36,15 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func introHandler(w http.ResponseWriter, r *http.Request) {
+	introTemplate := template.Must(template.ParseFiles("views/intro.html"))
+	introTemplate.Execute(w, "intro")
+}
+
 type context struct {
 	Path      string
 	Url       string
 	Submitted bool
-}
-
-func introHandler(w http.ResponseWriter, r *http.Request) {
-	introTemplate := template.Must(template.ParseFiles("views/intro.html"))
-	introTemplate.Execute(w, "intro")
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +62,6 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		if err := registerLinkTemplate.Execute(w, cont); err != nil {
 			log.Print(err)
 		}
-
 	} else {
 		path := strings.TrimLeft(r.URL.RawQuery, "path=")
 		cont := context{Path: path, Url: "", Submitted: false}

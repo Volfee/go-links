@@ -3,15 +3,17 @@
         <title>Register you go-link</title>
     </head>
     <body>
-        <h1>Register your go-link</h1>
-        <h3>go/{{ .Path }}</h3>
-        <form action="/create/" method="POST">
-            <input type="hidden" name="path" value="{{ .Path }}">
-            <label for="url">url:</label><input type="text" name="url">
-            <input type="submit" value="Create">
-        </form>
         {{ if .Submitted }}
-        URL registered succesfully.
+            <h1>URL registered succesfully.</h1>
+            You can use you go link now: <a href="{{ .Url }}">go/{{ .Path }}</a> 
+        {{ else }}
+            <h1>Register your go-link</h1>
+            <h3>go/{{ .Path }}</h3>
+            <form action="/create/" method="POST">
+                <input type="hidden" name="path" value="{{ .Path }}">
+                <label for="url">url:</label><input type="text" name="url">
+                <input type="submit" value="Create">
+            </form>
         {{ end }}
     </body>
 </html>
