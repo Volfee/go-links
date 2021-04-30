@@ -12,7 +12,8 @@ import (
 func Run(port int) {
 
 	http.HandleFunc("/", requestHandler)
-	http.HandleFunc("/create/", registerNewView)
+	http.HandleFunc("/create/", registerHandler)
+	http.HandleFunc("/intro", introHandler)
 	http.HandleFunc("/favicon.ico", http.NotFound)
 
 	log.Printf("Server running on port :%d", port)
@@ -21,7 +22,9 @@ func Run(port int) {
 
 func requestHandler(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimLeft(r.URL.Path, "/")
-	if url, ok := database.Lookup(path); ok {
+	if path == "" {
+		http.Redirect(w, r, "/intro", http.StatusFound)
+	} else if url, ok := database.Lookup(path); ok {
 		log.Printf("Redirecting to %s", url)
 		http.Redirect(w, r, url, http.StatusFound)
 	} else {
@@ -39,7 +42,12 @@ type context struct {
 	Submitted bool
 }
 
-func registerNewView(w http.ResponseWriter, r *http.Request) {
+func introHandler(w http.ResponseWriter, r *http.Request) {
+	introTemplate := template.Must(template.ParseFiles("views/intro.html"))
+	introTemplate.Execute(w, "intro")
+}
+
+func registerHandler(w http.ResponseWriter, r *http.Request) {
 	registerLinkTemplate := template.Must(template.ParseFiles("views/register_link.html"))
 	if r.Method == http.MethodPost {
 		if err := r.ParseForm(); err != nil {
