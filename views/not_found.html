@@ -1,12 +1,7 @@
-<html>
-    <head>
-    <title>Page not found.</title>
-    </head>
-    <body>
-        <h1>Link go/{{ . }} doesn't exist.</h1>
-        <form action="/create/" method="get">
-        <input type="hidden" name="path" value="{{ . }}">
-        <input type="submit" value="Create!">
-        </form>
-    </body>
-</html>
+{{ template "header" }}
+    <h1>Link go/{{ . }} doesn't exist.</h1>
+    <form action="/create/" method="get">
+    <input type="hidden" name="path" value="{{ . }}">
+    <input type="submit" value="Create!">
+    </form>
+{{ template "footer" }}

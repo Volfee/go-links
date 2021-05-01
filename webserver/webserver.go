@@ -29,7 +29,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, url, http.StatusFound)
 	} else {
 		log.Printf("Path %s not found; Asking to register.", path)
-		registerLinkTemplate := template.Must(template.ParseFiles("views/not_found.html"))
+		registerLinkTemplate := loadTemplate("views/not_found.html", defaultWrappers)
 		if err := registerLinkTemplate.Execute(w, path); err != nil {
 			log.Print(err)
 		}
@@ -37,7 +37,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func introHandler(w http.ResponseWriter, r *http.Request) {
-	introTemplate := template.Must(template.ParseFiles("views/intro.html"))
+	introTemplate := loadTemplate("views/intro.html", defaultWrappers)
 	introTemplate.Execute(w, "intro")
 }
 
@@ -48,7 +48,7 @@ type context struct {
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
-	registerLinkTemplate := template.Must(template.ParseFiles("views/register_link.html"))
+	registerLinkTemplate := loadTemplate("views/register_link.html", defaultWrappers)
 	if r.Method == http.MethodPost {
 		if err := r.ParseForm(); err != nil {
 			log.Fatal(err)
@@ -69,4 +69,31 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 			log.Print(err)
 		}
 	}
+}
+
+// Structure for storing default wrappers.
+type wrappers struct {
+	header string
+	footer string
+}
+
+// Default set of header and footer wrappers.
+var defaultWrappers = wrappers{
+	header: "views/header.html",
+	footer: "views/footer.html",
+}
+
+// loadTemaplate parses provided template from file, appends footer and header
+// and makes sure that template loaded correctly or panics if not.
+func loadTemplate(templatePath string, w wrappers) *template.Template {
+	templateWithHeaders := withWrappers(templatePath, w)
+	return template.Must(template.ParseFiles(templateWithHeaders...))
+}
+
+//withWrappers appends header and footer to template.
+func withWrappers(templatePath string, w wrappers) (paths []string) {
+	paths = append(paths, templatePath)
+	paths = append(paths, w.header)
+	paths = append(paths, w.footer)
+	return paths
 }
