@@ -1,5 +1,16 @@
 {{ define "header" }}
-<html>
-    <head><title>Welcome to go/links</title></head>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Welcome to go/links</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
     <body>
+    <div class="cover-container d-flex w-100 h-100 mx-auto flex-column">
+    <header class="mb-auto">
+        {{ template "navbar" }}
+    </header>
+    <div class="jumbotron">
 {{ end }}

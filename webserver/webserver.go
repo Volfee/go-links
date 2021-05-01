@@ -75,12 +75,14 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 type wrappers struct {
 	header string
 	footer string
+	navbar string
 }
 
 // Default set of header and footer wrappers.
 var defaultWrappers = wrappers{
 	header: "views/header.html",
 	footer: "views/footer.html",
+	navbar: "views/navbar.html",
 }
 
 // loadTemaplate parses provided template from file, appends footer and header
@@ -95,5 +97,6 @@ func withWrappers(templatePath string, w wrappers) (paths []string) {
 	paths = append(paths, templatePath)
 	paths = append(paths, w.header)
 	paths = append(paths, w.footer)
+	paths = append(paths, w.navbar)
 	return paths
 }
