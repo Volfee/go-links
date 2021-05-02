@@ -17,7 +17,7 @@ func Run(port string) {
 	// Tutorial
 	http.HandleFunc("/intro", renderTemplateHandler("views/intro.html"))
 	http.HandleFunc("/quite-hard-to-memorize-pattern-here-not-gonna-lie", renderTemplateHandler("views/quite-hard-to-memoroze-pattern-here-not-gonna-lie.html"))
-	http.HandleFunc("/register", renderTemplateHandler("views/new-links.html"))
+	http.HandleFunc("/register", renderTemplateHandler("views/new_links.html"))
 	http.HandleFunc("/finish", renderTemplateHandler("views/finish.html"))
 
 	log.Printf("Server running on port :%s", port)
