@@ -1,7 +1,6 @@
 package webserver
 
 import (
-	"fmt"
 	"golinks/database"
 	"html/template"
 	"log"
@@ -9,15 +8,15 @@ import (
 	"strings"
 )
 
-func Run(port int) {
+func Run(port string) {
 
 	http.HandleFunc("/", requestHandler)
 	http.HandleFunc("/create/", registerHandler)
 	http.HandleFunc("/intro", introHandler)
 	http.HandleFunc("/favicon.ico", http.NotFound)
 
-	log.Printf("Server running on port :%d", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	log.Printf("Server running on port :%s", port)
+	http.ListenAndServe(":"+port, nil)
 }
 
 func requestHandler(w http.ResponseWriter, r *http.Request) {

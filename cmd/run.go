@@ -1,7 +1,14 @@
 package main
 
-import "golinks/webserver"
+import (
+	"golinks/webserver"
+	"os"
+)
 
 func main() {
-	webserver.Run(8080)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	webserver.Run(port)
 }
