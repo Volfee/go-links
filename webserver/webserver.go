@@ -11,9 +11,14 @@ import (
 func Run(port string) {
 
 	http.HandleFunc("/", requestHandler)
-	http.HandleFunc("/create/", registerHandler)
-	http.HandleFunc("/intro", introHandler)
 	http.HandleFunc("/favicon.ico", http.NotFound)
+	http.HandleFunc("/create/", registerHandler)
+
+	// Tutorial
+	http.HandleFunc("/intro", renderTemplateHandler("views/intro.html"))
+	http.HandleFunc("/quite-hard-to-memorize-pattern-here-not-gonna-lie", renderTemplateHandler("views/quite-hard-to-memoroze-pattern-here-not-gonna-lie.html"))
+	http.HandleFunc("/register", renderTemplateHandler("views/new-links.html"))
+	http.HandleFunc("/finish", renderTemplateHandler("views/finish.html"))
 
 	log.Printf("Server running on port :%s", port)
 	http.ListenAndServe(":"+port, nil)
@@ -32,6 +37,13 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		if err := registerLinkTemplate.Execute(w, path); err != nil {
 			log.Print(err)
 		}
+	}
+}
+
+func renderTemplateHandler(templatePath string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		introTemplate := loadTemplate(templatePath, defaultWrappers)
+		introTemplate.Execute(w, "intro")
 	}
 }
 
