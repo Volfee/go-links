@@ -3,6 +3,8 @@ package database
 
 import (
 	"log"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -75,6 +77,12 @@ func RegisterUrl(path, url string) error {
 	}
 	defer db.Close()
 
+	// Check is valid URL and starts with http(s).
+	url, err = validateAndFixUrl(url)
+	if err != nil {
+		return err
+	}
+
 	// Save path and url.
 	err = db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
@@ -87,4 +95,17 @@ func RegisterUrl(path, url string) error {
 
 	log.Printf("Database: %s, %s registered.", path, url)
 	return nil
+}
+
+// validateAndFixUrl validates if URL is valid and starts with http:// or https://. If not then appends
+// and returns fixed link.
+func validateAndFixUrl(url_string string) (string, error) {
+	if _, err := url.ParseRequestURI(url_string); err != nil {
+		return "", err
+	}
+	if !(strings.HasPrefix(url_string, "http://") || strings.HasPrefix(url_string, "https://")) {
+		url_string = "https://" + url_string
+	}
+
+	return url_string, nil
 }
