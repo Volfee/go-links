@@ -8,7 +8,14 @@ import (
 	"strings"
 )
 
-const dbPath = "urls.db"
+func init() {
+	// Setup permanent DB
+	dbPerm := database.ConnectWith(database.PermenentDB)
+	dbPerm.RegisterUrl("next-part", "http://volfee.link/quite-hard-to-memorize-pattern-here-not-gonna-lie")
+	dbPerm.RegisterUrl("git-undo", "https://stackoverflow.com/questions/927358/how-do-i-undo-the-most-recent-local-commits-in-git")
+	dbPerm.RegisterUrl("register", "http://volfee.link/how-to-register-new-link")
+	dbPerm.RegisterUrl("finish", "http://volfee.link/thats-all-folks")
+}
 
 func Run(port string) {
 
@@ -18,9 +25,10 @@ func Run(port string) {
 
 	// Tutorial
 	http.HandleFunc("/intro", renderTemplateHandler("views/intro.html"))
-	http.HandleFunc("/quite-hard-to-memorize-pattern-here-not-gonna-lie", renderTemplateHandler("views/quite-hard-to-memoroze-pattern-here-not-gonna-lie.html"))
-	http.HandleFunc("/register", renderTemplateHandler("views/new_links.html"))
-	http.HandleFunc("/finish", renderTemplateHandler("views/finish.html"))
+	http.HandleFunc("/quite-hard-to-memorize-pattern-here-not-gonna-lie",
+		renderTemplateHandler("views/quite-hard-to-memoroze-pattern-here-not-gonna-lie.html"))
+	http.HandleFunc("/how-to-register-new-link", renderTemplateHandler("views/new_links.html"))
+	http.HandleFunc("/thats-all-folks", renderTemplateHandler("views/finish.html"))
 
 	log.Printf("Server running on port :%s", port)
 	http.ListenAndServe(":"+port, nil)
@@ -28,10 +36,14 @@ func Run(port string) {
 
 func requestHandler(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimLeft(r.URL.Path, "/")
-	db := database.ConnectWith(dbPath)
+	dbPerm := database.ConnectWith(database.PermenentDB)
+	dbTemp := database.ConnectWith(database.TempDB)
 	if path == "" {
 		http.Redirect(w, r, "/intro", http.StatusFound)
-	} else if url, ok := db.Lookup(path); ok {
+	} else if url, ok := dbPerm.Lookup(path); ok {
+		log.Printf("Redirecting to %s", url)
+		http.Redirect(w, r, url, http.StatusFound)
+	} else if url, ok := dbTemp.Lookup(path); ok {
 		log.Printf("Redirecting to %s", url)
 		http.Redirect(w, r, url, http.StatusFound)
 	} else {
@@ -70,7 +82,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		path := r.Form.Get("path")
 		url := r.Form.Get("url")
 
-		db := database.ConnectWith(dbPath)
+		db := database.ConnectWith(database.TempDB)
 		if err := db.RegisterUrl(path, url); err != nil {
 			log.Fatal(err)
 		}

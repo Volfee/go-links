@@ -10,10 +10,6 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-var dbOptions *bolt.Options = &bolt.Options{
-	Timeout: 1 * time.Second,
-}
-
 type Database struct {
 	dbPath     string
 	bucketName string
@@ -21,6 +17,15 @@ type Database struct {
 
 func ConnectWith(path string) *Database {
 	return &Database{path, "UrlFromPath"}
+}
+
+const (
+	PermenentDB = "urlsPerm.db"
+	TempDB      = "urlsTemp.db"
+)
+
+var dbOptions *bolt.Options = &bolt.Options{
+	Timeout: 1 * time.Second,
 }
 
 // Lookup checks if `path` key exists in database and returns related `url` value if found. If not
@@ -38,6 +43,9 @@ func (d *Database) Lookup(path string) (url string, ok bool) { // TODO: return
 	var url_bytes []byte
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(d.bucketName))
+		if b == nil {
+			return nil
+		}
 		url_bytes = b.Get([]byte(path))
 		return nil
 	})
