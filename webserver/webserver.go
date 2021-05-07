@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const dbPath = "urls.db"
+
 func Run(port string) {
 
 	http.HandleFunc("/", requestHandler)
@@ -26,9 +28,10 @@ func Run(port string) {
 
 func requestHandler(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimLeft(r.URL.Path, "/")
+	db := database.ConnectWith(dbPath)
 	if path == "" {
 		http.Redirect(w, r, "/intro", http.StatusFound)
-	} else if url, ok := database.Lookup(path); ok {
+	} else if url, ok := db.Lookup(path); ok {
 		log.Printf("Redirecting to %s", url)
 		http.Redirect(w, r, url, http.StatusFound)
 	} else {
@@ -66,7 +69,9 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		path := r.Form.Get("path")
 		url := r.Form.Get("url")
-		if err := database.RegisterUrl(path, url); err != nil {
+
+		db := database.ConnectWith(dbPath)
+		if err := db.RegisterUrl(path, url); err != nil {
 			log.Fatal(err)
 		}
 		cont := context{Path: path, Url: url, Submitted: true}
